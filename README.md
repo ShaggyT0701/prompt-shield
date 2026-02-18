@@ -19,6 +19,8 @@ pip install prompt-shield-ai[anthropic]        # + Anthropic wrapper
 pip install prompt-shield-ai[all]              # Everything
 ```
 
+> **Python 3.14 note:** ChromaDB does not yet support Python 3.14. If you are on 3.14, disable the vault in your config (`vault: {enabled: false}`) or use Python 3.10–3.13.
+
 ## 30-Second Quickstart
 
 ```python
