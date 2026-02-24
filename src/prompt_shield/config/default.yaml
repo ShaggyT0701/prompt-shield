@@ -119,6 +119,17 @@ prompt_shield:
       threshold: 0.7
       model_name: "protectai/deberta-v3-base-prompt-injection-v2"
       device: "cpu"
+    d023_pii_detection:
+      enabled: true
+      severity: high
+      entities:
+        email: true
+        phone: true
+        ssn: true
+        credit_card: true
+        api_key: true
+        ip_address: true
+      custom_patterns: []
 
   allowlist:
     patterns: []

@@ -123,6 +123,7 @@ DETECTOR_OWASP_MAP: dict[str, list[str]] = {
     "d020_nested_instruction": ["LLM01"],
     "d021_vault_similarity": ["LLM01"],
     "d022_semantic_classifier": ["LLM01"],
+    "d023_pii_detection": ["LLM02"],
 }
 
 # All valid OWASP category IDs for validation
