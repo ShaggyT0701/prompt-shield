@@ -6,7 +6,7 @@
 - Self-learning vault (local ChromaDB)
 - CLI, FastAPI/Flask/Django middleware, LangChain/LlamaIndex/MCP integrations
 
-## v0.2.0 (current)
+## v0.2.0
 
 ### OWASP LLM Top 10 Compliance Mapping
 All 22 detectors mapped to OWASP LLM Top 10 (2025) categories. Coverage reports show which categories are covered and where gaps remain.
@@ -24,7 +24,16 @@ Accuracy benchmarking framework with ML metrics (precision, recall, F1, accuracy
 - `prompt-shield benchmark datasets` — list available datasets
 - Save results to JSON for tracking over time
 
-## v0.3.0 — Community, Plugins & Trust
+## v0.3.0 (current) — Community, Plugins & Trust
+
+### PII Detection & Redaction ✅
+New `d023_pii_detection` detector and standalone `PIIRedactor` for detecting and redacting personally identifiable information before prompts reach the LLM. Mapped to OWASP LLM02 (Sensitive Information Disclosure).
+- 6 entity types: email, phone, SSN, credit card, API key, IP address (16 regex patterns)
+- Entity-type-aware redaction placeholders (`[EMAIL_REDACTED]`, `[SSN_REDACTED]`, etc.)
+- CLI commands: `prompt-shield pii scan` and `prompt-shield pii redact` with JSON output
+- Per-entity enable/disable and custom patterns via YAML config
+- Integrated into AgentGuard `_sanitize_text()` for automatic PII redaction in the sanitize flow
+- Standalone `PIIRedactor` usable directly from Python API
 
 ### Community & Integrations
 - `prompt-shield-threats` public repo — community-contributed attack fingerprints via PRs
@@ -33,12 +42,6 @@ Accuracy benchmarking framework with ML metrics (precision, recall, F1, accuracy
 - n8n community node
 - CrewAI integration
 - Get listed on awesome-llm-security lists
-
-### PII Detection & Redaction
-Detect and redact personally identifiable information (SSNs, emails, credit cards, phone numbers, API keys, secrets) before prompts reach the LLM. Extends the data exfiltration detector (d013) into a full data protection layer.
-- Redaction mode — mask sensitive data before forwarding to LLM
-- Configurable entity types and custom patterns
-- Structured metadata in scan reports (redacted fields, entity counts)
 
 ### Prometheus Metrics Endpoint
 Expose a `/metrics` endpoint for scan counts, block rates, detector hit rates, latency percentiles, and vault size — so users can plug prompt-shield into their existing monitoring stack without waiting for a dashboard.
@@ -130,7 +133,7 @@ Capabilities observed in comparable projects that would strengthen prompt-shield
 - **Standardized adversarial benchmarking** — Benchmark prompt-shield against their 9 datasets (NotInject, BIPIA, Garak, ToxicChat, WildGuard, JavelinBench) to produce comparable accuracy numbers.
 
 ### From TSZ (Thyris Safe Zone)
-- **PII detection and redaction** — Detect and redact personally identifiable information (SSNs, emails, credit cards, API keys) before prompts reach the LLM. A natural extension of our data exfiltration detector (d013).
+- ~~**PII detection and redaction**~~ — ✅ Shipped in v0.3.0 (`d023_pii_detection` + `PIIRedactor`).
 - **Output schema validation** — Validate that LLM structured outputs conform to expected schemas. Catch malformed JSON or unexpected fields that could indicate injection in tool-use workflows.
 - **Blocked/redacted response metadata** — Return structured signals (redacted output, metadata, blocked flag) so downstream apps can decide how to proceed rather than just block/pass.
 
