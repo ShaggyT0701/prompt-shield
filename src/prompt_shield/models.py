@@ -89,6 +89,16 @@ class ThreatFeed(BaseModel):
     threats: list[ThreatEntry]
 
 
+class RedactionResult(BaseModel):
+    """Result from PII redaction."""
+
+    original_text: str
+    redacted_text: str
+    redaction_count: int
+    entity_counts: dict[str, int] = {}
+    redacted_entities: list[dict[str, str]] = []
+
+
 class GateResult(BaseModel):
     """Result from any AgentGuard gate scan."""
 

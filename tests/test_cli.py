@@ -316,3 +316,83 @@ class TestCLIBenchmark:
         parsed = json.loads(result.output)
         assert isinstance(parsed, list)
         assert any(d["id"] == "sample" for d in parsed)
+
+
+class TestCLIPII:
+    """Tests for the PII scan and redact commands."""
+
+    def test_pii_scan_detects(self, runner: CliRunner) -> None:
+        """pii scan should detect PII in text."""
+        result = runner.invoke(
+            main, ["pii", "scan", "My email is user@example.com"],
+        )
+        assert result.exit_code == 0
+        assert "email" in result.output.lower()
+
+    def test_pii_scan_clean(self, runner: CliRunner) -> None:
+        """pii scan should report no PII for clean text."""
+        result = runner.invoke(
+            main, ["pii", "scan", "Hello, how are you?"],
+        )
+        assert result.exit_code == 0
+        assert "No PII" in result.output
+
+    def test_pii_scan_json(self, runner: CliRunner) -> None:
+        """pii scan --json-output should produce valid JSON."""
+        result = runner.invoke(
+            main,
+            ["--json-output", "pii", "scan", "Contact user@example.com"],
+        )
+        assert result.exit_code == 0
+        parsed = json.loads(result.output)
+        assert parsed["pii_found"] is True
+        assert parsed["total_entities"] >= 1
+
+    def test_pii_scan_json_clean(self, runner: CliRunner) -> None:
+        """pii scan --json-output for clean text."""
+        result = runner.invoke(
+            main,
+            ["--json-output", "pii", "scan", "Nothing here"],
+        )
+        assert result.exit_code == 0
+        parsed = json.loads(result.output)
+        assert parsed["pii_found"] is False
+
+    def test_pii_redact(self, runner: CliRunner) -> None:
+        """pii redact should replace PII with placeholders."""
+        result = runner.invoke(
+            main, ["pii", "redact", "Email: user@example.com"],
+        )
+        assert result.exit_code == 0
+        assert "[EMAIL_REDACTED]" in result.output
+        assert "user@example.com" not in result.output
+
+    def test_pii_redact_clean(self, runner: CliRunner) -> None:
+        """pii redact should pass through clean text."""
+        result = runner.invoke(
+            main, ["pii", "redact", "Hello world"],
+        )
+        assert result.exit_code == 0
+        assert "No PII" in result.output
+
+    def test_pii_redact_json(self, runner: CliRunner) -> None:
+        """pii redact --json-output should produce valid JSON."""
+        result = runner.invoke(
+            main,
+            ["--json-output", "pii", "redact", "user@example.com"],
+        )
+        assert result.exit_code == 0
+        parsed = json.loads(result.output)
+        assert "redacted_text" in parsed
+        assert "[EMAIL_REDACTED]" in parsed["redacted_text"]
+        assert parsed["redaction_count"] >= 1
+
+    def test_pii_redact_multiple(self, runner: CliRunner) -> None:
+        """pii redact should handle multiple PII types."""
+        result = runner.invoke(
+            main,
+            ["pii", "redact", "Email: a@b.com SSN: 123-45-6789"],
+        )
+        assert result.exit_code == 0
+        assert "[EMAIL_REDACTED]" in result.output
+        assert "[SSN_REDACTED]" in result.output

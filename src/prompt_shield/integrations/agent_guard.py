@@ -174,17 +174,44 @@ class AgentGuard:
         )
 
     def _sanitize_text(self, text: str, report: ScanReport) -> str:
-        """Replace matched segments with sanitize_replacement."""
+        """Replace matched segments with sanitize_replacement.
+
+        Uses entity-type-aware placeholders for PII detections (d023).
+        """
         if not report.detections:
             return text
-        # Collect all match positions, sort by start descending for safe replacement
-        positions: list[tuple[int, int]] = []
-        for det in report.detections:
-            for match in det.matches:
-                if match.position:
-                    positions.append(match.position)
-        positions.sort(key=lambda p: p[0], reverse=True)
-        result = text
-        for start, end in positions:
-            result = result[:start] + self.sanitize_replacement + result[end:]
-        return result
+
+        # Check for PII detections — use entity-type-aware redaction
+        pii_detections = [
+            d for d in report.detections if d.detector_id == "d023_pii_detection"
+        ]
+        if pii_detections:
+            from prompt_shield.pii.redactor import PIIRedactor
+
+            redactor = PIIRedactor()
+            pii_matches = []
+            for det in pii_detections:
+                for match in det.matches:
+                    pii_matches.append(
+                        {
+                            "description": match.description,
+                            "position": match.position,
+                        }
+                    )
+            text = redactor.redact_with_detections(text, pii_matches)
+
+        # Handle non-PII detections with generic replacement
+        non_pii = [
+            d for d in report.detections if d.detector_id != "d023_pii_detection"
+        ]
+        if non_pii:
+            positions: list[tuple[int, int]] = []
+            for det in non_pii:
+                for match in det.matches:
+                    if match.position:
+                        positions.append(match.position)
+            positions.sort(key=lambda p: p[0], reverse=True)
+            for start, end in positions:
+                text = text[:start] + self.sanitize_replacement + text[end:]
+
+        return text

@@ -29,6 +29,17 @@ def main(
     ctx.obj["json"] = use_json
 
 
+def _read_input(input_text: str, file_path: str | None) -> str:
+    """Read input text from argument, file, or stdin."""
+    if file_path:
+        return Path(file_path).read_text(encoding="utf-8")
+    if input_text == "-":
+        if sys.stdin.isatty():
+            click.echo("Enter text (Ctrl+D to finish):", err=True)
+        return sys.stdin.read()
+    return input_text
+
+
 def _get_engine(ctx: click.Context):  # type: ignore[no-untyped-def]
     """Lazily create engine from CLI context."""
     if "engine" not in ctx.obj:
@@ -476,6 +487,99 @@ def test_cmd(ctx: click.Context) -> None:
     )
     if failed > 0:
         sys.exit(1)
+
+
+# --- pii ---
+
+
+@main.group()
+def pii() -> None:
+    """PII detection and redaction."""
+
+
+@pii.command("scan")
+@click.argument("input_text", default="-")
+@click.option("--file", "-f", "file_path", default=None, help="Read input from file")
+@click.pass_context
+def pii_scan(ctx: click.Context, input_text: str, file_path: str | None) -> None:
+    """Scan text for personally identifiable information."""
+    use_json = ctx.obj.get("json", False)
+    text = _read_input(input_text, file_path)
+
+    if not text.strip():
+        click.echo("Error: No input provided", err=True)
+        sys.exit(1)
+
+    from prompt_shield.pii.redactor import PIIRedactor
+
+    redactor = PIIRedactor()
+    result = redactor.redact(text)
+
+    if use_json:
+        click.echo(
+            json.dumps(
+                {
+                    "pii_found": result.redaction_count > 0,
+                    "entity_counts": result.entity_counts,
+                    "total_entities": result.redaction_count,
+                    "entities": result.redacted_entities,
+                },
+                indent=2,
+            )
+        )
+    else:
+        if result.redaction_count == 0:
+            click.secho("  No PII detected.", fg="green")
+        else:
+            click.echo()
+            click.secho(
+                f"  Found {result.redaction_count} PII instance(s):", bold=True
+            )
+            for entity_type, count in sorted(result.entity_counts.items()):
+                click.echo(f"    {entity_type}: {count}")
+            click.echo()
+            click.secho("  Entities:", bold=True)
+            for ent in result.redacted_entities:
+                click.echo(f'    [{ent["entity_type"]}] "{ent["original"]}"')
+        click.echo()
+
+
+@pii.command("redact")
+@click.argument("input_text", default="-")
+@click.option("--file", "-f", "file_path", default=None, help="Read input from file")
+@click.pass_context
+def pii_redact(ctx: click.Context, input_text: str, file_path: str | None) -> None:
+    """Detect and redact PII from text."""
+    use_json = ctx.obj.get("json", False)
+    text = _read_input(input_text, file_path)
+
+    if not text.strip():
+        click.echo("Error: No input provided", err=True)
+        sys.exit(1)
+
+    from prompt_shield.pii.redactor import PIIRedactor
+
+    redactor = PIIRedactor()
+    result = redactor.redact(text)
+
+    if use_json:
+        click.echo(result.model_dump_json(indent=2))
+    else:
+        if result.redaction_count == 0:
+            click.secho("  No PII detected. Text unchanged.", fg="green")
+            click.echo()
+            click.echo(f"  {text}")
+        else:
+            click.echo()
+            click.secho(
+                f"  Redacted {result.redaction_count} PII instance(s):", bold=True
+            )
+            for entity_type, count in sorted(result.entity_counts.items()):
+                click.echo(f"    {entity_type}: {count}")
+            click.echo()
+            click.secho("  Redacted text:", bold=True)
+            click.echo(f"  {result.redacted_text}")
+        click.echo()
 
 
 # --- compliance ---
